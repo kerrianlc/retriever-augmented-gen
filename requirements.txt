@@ -1,0 +1,14 @@
+numpy
+pandas
+matplotlib
+torch
+transformers 
+tqdm
+accelerate 
+bitsandbytes 
+langchain 
+sentence-transformers 
+openpyxl
+datasets 
+langchain-community 
+langchain-huggingface
