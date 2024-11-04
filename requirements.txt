@@ -12,3 +12,5 @@ openpyxl
 datasets 
 langchain-community 
 langchain-huggingface
+faiss-cpu
+faiss-gpu
