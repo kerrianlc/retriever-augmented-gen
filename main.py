@@ -5,7 +5,7 @@ from langchain_community.vectorstores.utils import DistanceStrategy
 from src.text_splitter import EMBEDDING_MODEL_NAME, split_documents
 from src.reader import reader_llm
 from src.prompt import rag_prompt_template
-from src.data_loader import RAW_KNOWLEDGE_BASE
+from src.knowledge_base import knowledge_base, KNOWLEDGE_BASE
 import time
 
 pd.set_option("display.max_colwidth", None)
@@ -21,18 +21,19 @@ def main(user_query: str):
             "normalize_embeddings": True
         },  # Set `True` for cosine similarity
     )
+    raw_knowledge_base = knowledge_base(KNOWLEDGE_BASE)
     docs_processed = split_documents(
         512,  # We choose a chunk size adapted to our model
-        RAW_KNOWLEDGE_BASE,
+        raw_knowledge_base,
         tokenizer_name=EMBEDDING_MODEL_NAME,
     )
-    KNOWLEDGE_VECTOR_DATABASE = FAISS.from_documents(
+    knowledge_vect_db = FAISS.from_documents(
         docs_processed, embedding_model, distance_strategy=DistanceStrategy.COSINE
     )
 
-    READER_LLM, tokenizer = reader_llm()
-    RAG_PROMPT_TEMPLATE = rag_prompt_template(tokenizer)
-    retrieved_docs = KNOWLEDGE_VECTOR_DATABASE.similarity_search(query=user_query, k=5)
+    reader_llm, read_tokenizer = reader_llm()
+    rag_prompt_template = rag_prompt_template(read_tokenizer)
+    retrieved_docs = knowledge_vect_db.similarity_search(query=user_query, k=5)
 
     retrieved_docs_text = [
         doc.page_content for doc in retrieved_docs
@@ -42,10 +43,10 @@ def main(user_query: str):
         [f"Document {str(i)}:::\n" + doc for i, doc in enumerate(retrieved_docs_text)]
     )
 
-    final_prompt = RAG_PROMPT_TEMPLATE.format(question=user_query, context=context)
+    final_prompt = rag_prompt_template.format(question=user_query, context=context)
 
     # Redact an answer
-    answer = READER_LLM(final_prompt)[0]["generated_text"]
+    answer = reader_llm(final_prompt)[0]["generated_text"]
     print(answer)
     end = time.time()
     print(f"Time elapsed: {end - start} secs")

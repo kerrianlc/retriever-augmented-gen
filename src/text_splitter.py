@@ -1,7 +1,7 @@
 from typing import List, Optional
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.docstore.document import Document as LangchainDocument
-from .data_loader import RAW_KNOWLEDGE_BASE
+from .knowledge_base import RAW_KNOWLEDGE_BASE
 from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer
 
@@ -35,7 +35,7 @@ docs_processed = []
 for doc in RAW_KNOWLEDGE_BASE:
     docs_processed += text_splitter.split_documents([doc])
 
-def split_documents(
+def recursive_chunker(
     chunk_size: int,
     knowledge_base: List[LangchainDocument],
     tokenizer_name: Optional[str] = EMBEDDING_MODEL_NAME,
@@ -51,10 +51,10 @@ def split_documents(
         strip_whitespace=True,
         separators=MARKDOWN_SEPARATORS,
     )
-
+    
     docs_processed = []
-    for doc in knowledge_base:
-        docs_processed += text_splitter.split_documents([doc])
+    # for doc in knowledge_base:
+    docs_processed = text_splitter.split_documents(knowledge_base)
 
     # Remove duplicates
     unique_texts = {}
