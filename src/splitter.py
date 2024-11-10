@@ -1,44 +1,14 @@
 from typing import List, Optional
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.docstore.document import Document as LangchainDocument
-from .knowledge_base import RAW_KNOWLEDGE_BASE
-from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer
+from .common import MARKDOWN_SEPARATORS, DOC_EMBED_MODEL_NAME
 
-
-# We use a hierarchical list of separators specifically tailored for splitting Markdown documents
-# This list is taken from LangChain's MarkdownTextSplitter class
-MARKDOWN_SEPARATORS = [
-    "\n#{1,6} ",
-    "```\n",
-    "\n\\*\\*\\*+\n",
-    "\n---+\n",
-    "\n___+\n",
-    "\n\n",
-    "\n",
-    " ",
-    "",
-]
-
-EMBEDDING_MODEL_NAME = "thenlper/gte-small"
-
-
-text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=1000,  # The maximum number of characters in a chunk: we selected this value arbitrarily
-    chunk_overlap=100,  # The number of characters to overlap between chunks
-    add_start_index=True,  # If `True`, includes chunk's start index in metadata
-    strip_whitespace=True,  # If `True`, strips whitespace from the start and end of every document
-    separators=MARKDOWN_SEPARATORS,
-)
-
-docs_processed = []
-for doc in RAW_KNOWLEDGE_BASE:
-    docs_processed += text_splitter.split_documents([doc])
 
 def recursive_chunker(
     chunk_size: int,
     knowledge_base: List[LangchainDocument],
-    tokenizer_name: Optional[str] = EMBEDDING_MODEL_NAME,
+    tokenizer_name: Optional[str] = DOC_EMBED_MODEL_NAME,
 ) -> List[LangchainDocument]:
     """
     Split documents into chunks of maximum size `chunk_size` tokens and return a list of documents.

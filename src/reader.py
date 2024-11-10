@@ -1,8 +1,13 @@
 from transformers import pipeline
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+from transformers import (
+    AutoTokenizer,
+    AutoModelForCausalLM,
+    BitsAndBytesConfig,
+)
 
-READER_MODEL_NAME = "HuggingFaceH4/zephyr-7b-beta"
+from .common import READER_MODEL_NAME
+
 
 bnb_config = BitsAndBytesConfig(
     load_in_4bit=True,
@@ -11,17 +16,26 @@ bnb_config = BitsAndBytesConfig(
     bnb_4bit_compute_dtype=torch.bfloat16,
 )
 
-def reader_llm():
-    model = AutoModelForCausalLM.from_pretrained(READER_MODEL_NAME, quantization_config=bnb_config)
-    tokenizer = AutoTokenizer.from_pretrained(READER_MODEL_NAME)
 
-    return pipeline(
-        model=model,
-        tokenizer=tokenizer,
-        task="text-generation",
-        do_sample=True,
-        temperature=0.2,
-        repetition_penalty=1.1,
-        return_full_text=False,
-        max_new_tokens=500,
-    ), tokenizer
+def reader_llm():
+    # Insighful explanation of why to choose AutoModelForCausalLM instead of AutoModel
+    # https://www.reddit.com/r/huggingface/comments/1bv1kfk/what_is_the_difference_between/?rdt=39865
+    # Studying the embedded representation could be useful as well so the unused import
+    model = AutoModelForCausalLM.from_pretrained(
+        READER_MODEL_NAME, quantization_config=bnb_config)
+    tokenizer = AutoTokenizer.from_pretrained(READER_MODEL_NAME)
+    if torch.cuda.is_available():
+        model = model.to("cuda")
+    else:
+        print("CUDA is not available. Running on CPU instead.")
+    params = {
+        "model": model,
+        "tokenizer": tokenizer,
+        "task": "text-generation",
+        "do_sample": True,
+        "temperature": 0.2,
+        "repetition_penalty": 1.1,
+        "return_full_text": False,
+        "max_new_tokens": 500,
+    }
+    return pipeline(**params), tokenizer

@@ -12,5 +12,6 @@ datasets
 langchain-community 
 langchain-huggingface
 ragatouille
+peft
 faiss-cpu
 faiss-gpu
