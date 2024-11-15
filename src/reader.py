@@ -22,7 +22,8 @@ def reader_llm():
     # https://www.reddit.com/r/huggingface/comments/1bv1kfk/what_is_the_difference_between/?rdt=39865
     # Studying the embedded representation could be useful as well so the unused import
     model = AutoModelForCausalLM.from_pretrained(
-        READER_MODEL_NAME, quantization_config=bnb_config)
+        READER_MODEL_NAME, quantization_config=bnb_config
+    )
     tokenizer = AutoTokenizer.from_pretrained(READER_MODEL_NAME)
     if torch.cuda.is_available():
         model = model.to("cuda")

@@ -10,8 +10,8 @@ MARKDOWN_SEPARATORS = [
     "",
 ]
 
-KNOWLEDGE_BASE = "m-ric/huggingface_doc"
+KNOWLEDGE_BASE = "MaartenGr/arxiv_nlp"
 DOC_EMBED_MODEL_NAME = "thenlper/gte-small"
 
 
-READER_MODEL_NAME = "Qwen/Qwen2.5-0.5B"
+READER_MODEL_NAME = "HuggingFaceH4/zephyr-7b-beta"
